@@ -1,6 +1,8 @@
 const Event = require("../../models/eventModel");
 const User = require("../../models/userModel");
+const Booking = require("../../models/bookingModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   events: async () => {
@@ -31,6 +33,16 @@ module.exports = {
       }
 
       return user;
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      throw error;
+    }
+  },
+  bookings: async () => {
+    try {
+      const bookings = await Booking.find().populate("event").populate("user");
+
+      return bookings;
     } catch (error) {
       console.error("Error fetching events:", error);
       throw error;
@@ -106,6 +118,73 @@ module.exports = {
       return { _id: savedUser._id, email: savedUser.email, password: null };
     } catch (error) {
       console.error(`Got error please check`, error);
+      throw error;
+    }
+  },
+  bookEvent: async (args) => {
+    try {
+      const eventFound = await Event.findOne({ _id: args.id });
+      if (!eventFound) {
+        throw new Error("No event found, no booking available");
+      }
+      const booking = new Booking({
+        user: "6593efaa5014d87bd3bc1b19",
+        event: eventFound,
+      });
+
+      const bookingSaved = await booking.save();
+      return bookingSaved;
+    } catch (error) {
+      console.error(`Got error please check`, error);
+      throw error;
+    }
+  },
+  cancelBooking: async (args) => {
+    try {
+      const booking = await Booking.findById(args.id).populate("event");
+
+      if (!booking) {
+        throw new Error("Booking not found");
+      }
+
+      const event = await Event.findById(booking.event._id).populate("creator");
+
+      // Delete the booking
+      await Booking.deleteOne({ _id: args.id });
+
+      // Return the event data
+      return event;
+    } catch (error) {
+      console.error(`Got error please check`, error);
+      throw error;
+    }
+  },
+  login: async (args) => {
+    try {
+      const user = await User.findOne({ email: args.email });
+
+      if (!user) {
+        throw new Error("Invalid credentials");
+      }
+
+      const isPasswordvalid = await bcrypt.compare(
+        args.password,
+        user.password
+      );
+
+      if (!isPasswordvalid) {
+        throw new Error("Invalid credentials");
+      }
+
+      const token = jwt.sign(
+        { userId: user._id, email: user.email },
+        process.env.SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return { userId: user._id, token: token, tokenExpiration: 7 };
+    } catch (error) {
+      console.error("Error during login:", error);
       throw error;
     }
   },
