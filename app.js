@@ -5,11 +5,14 @@ const { graphqlHTTP } = require("express-graphql");
 const dbConnect = require("./config/dbConnect");
 const resolvers = require("./graphql/resolvers/index");
 const schema = require("./graphql/schema/index");
+const { authenticateUser } = require("./middleware/auth");
 
 const app = express();
 
 app.use(bodyParser.json());
 dbConnect();
+
+app.use(authenticateUser);
 
 app.use(
   "/graphql",
