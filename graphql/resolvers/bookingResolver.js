@@ -1,3 +1,6 @@
+const Booking = require("../../models/bookingModel");
+const Event = require("../../models/eventModel");
+
 const bookEvent = async (args, req) => {
   if (!req.isAuth) {
     throw new Error(`Not authenticated please login`);
@@ -44,7 +47,7 @@ const cancelBooking = async (args, req) => {
   }
 };
 
-const bookings = async () => {
+const bookings = async (args, req) => {
   try {
     if (!req.isAuth) {
       throw new Error("No authenticated please login!");
