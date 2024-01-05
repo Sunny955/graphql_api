@@ -1,5 +1,5 @@
 const { userEvents, createUser, getUser, users } = require("./userResolver");
-const { loginUser } = require("./authResolver");
+const { login, logout } = require("./authResolver");
 const { bookEvent, cancelBooking, bookings } = require("./bookingResolver");
 const { createEvent, deleteEvent, events } = require("./eventResolver");
 
@@ -13,6 +13,7 @@ module.exports = {
   createUser,
   bookEvent,
   cancelBooking,
-  loginUser,
+  login,
+  logout,
   userEvents,
 };

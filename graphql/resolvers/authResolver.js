@@ -1,7 +1,8 @@
+const User = require("../../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const loginUser = async (args) => {
+const login = async (args, req) => {
   try {
     const user = await User.findOne({ email: args.email });
 
@@ -21,6 +22,12 @@ const loginUser = async (args) => {
       { expiresIn: "7d" }
     );
 
+    // Set an HTTP-only cookie with the token
+    req.res.cookie("authToken", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return { userId: user._id, token: token, tokenExpiration: 7 };
   } catch (error) {
     console.error("Error during login:", error);
@@ -28,4 +35,9 @@ const loginUser = async (args) => {
   }
 };
 
-module.exports = { loginUser };
+const logout = async (args, req) => {
+  req.res.clearCookie("authToken");
+  return { message: "Logout successful" };
+};
+
+module.exports = { login, logout };

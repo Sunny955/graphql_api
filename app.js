@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const { graphqlHTTP } = require("express-graphql");
 const dbConnect = require("./config/dbConnect");
 const resolvers = require("./graphql/resolvers/index");
@@ -10,6 +11,7 @@ const { authenticateUser } = require("./middleware/auth");
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 dbConnect();
 
 app.use(authenticateUser);
